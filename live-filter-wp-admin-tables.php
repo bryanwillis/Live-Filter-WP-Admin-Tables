@@ -24,46 +24,47 @@ if (!defined('WPINC')) {
 }
 
 
-if (!function_exists('jquery_live_filter_wp_list_tables')) {
-	function jquery_live_filter_wp_list_tables()
+class LiveFilterAdminEditScreenTables
+{
+	public function __construct()
 	{
-		if (!is_admin()) return;
-		$screen = get_current_screen();
-		$base = $screen->base;
-		$type = $screen->post_type;
-		$name = $screen->id;
-		if (is_object($screen) && ($base === 'edit' || $name == 'plugins')) {
-			wp_enqueue_script('jquery-live-filter-wp-list-tables', plugin_dir_url(__FILE__) . 'jquery.live-filter-wp-list-tables.js', array(
+		add_action('admin_enqueue_scripts', array($this, 'admin_enqueue_scripts'));
+		add_action('admin_head-edit.php', array($this, 'admin_head'));
+                add_action('admin_head-plugins.php', array($this, 'admin_head'));
+	}
+	
+	public function admin_enqueue_scripts( $hook_suffix )
+	{
+
+         if ($hook_suffix == 'edit.php' || $hook_suffix == 'plugins.php') {
+
+	        wp_enqueue_script('jquery_filterTable', plugin_dir_url(__FILE__) . 'jquery.live-filter-wp-list-tables.js', array(
 				'jquery'
 			) , '1.0.0', true);
-			wp_enqueue_script('jquery-live-filter-wp-list-tables-init', plugin_dir_url(__FILE__) . 'jquery.live-filter-wp-list-tables-init.js', array(
-				'jquery-live-filter-wp-list-tables'
-			) , '1.0.0', true);
-		}
+
+                wp_enqueue_script('jquery_ready_filterTable', plugin_dir_url(__FILE__) . 'jquery.live-filter-wp-list-tables-init.js', array(
+				'jquery_filterTable'
+			) , '1.0.0', true);	
+         }
+
 	}
-
-	add_action('admin_enqueue_scripts', 'jquery_live_filter_wp_list_tables', 20);
-}
-
-
-
-if (!function_exists('jquery_wp_list_tables_filter_css_styles')) {
-	function jquery_wp_list_tables_filter_css_styles()
-	{
-		if (!is_admin()) return;
-		$screen = get_current_screen();
-		$base = $screen->base;
-		$name = $screen->id;
-		if (is_object($screen) && ($base == 'edit' || $name == 'plugins')) {
+	
+	public function admin_head()
+	{       
 		?>
-			<style type="text/css">
-				.filter-table .quick { margin-left: 0.5em; font-size: 0.8em; text-decoration: none; }
-				.fitler-table .quick:hover { text-decoration: underline; }
-				td.alt { background-color: rgba(255, 255, 0, 0.2); }
-			</style>
-		<?php
-		}
+		<style type="text/css">
+			.filter-table .quick { 
+				margin-left: 0.5em; 
+				font-size: 0.8em; 
+				text-decoration: none; 
+			}
+			.fitler-table .quick:hover { 
+				text-decoration: underline; 
+			}
+			td.alt { background-color: rgba(255, 255, 0, 0.2); }
+		</style>
+		<?php 
 	}
-
-	add_action('admin_head', 'jquery_wp_list_tables_filter_css_styles');
 }
+
+add_action('init', function() { new LiveFilterAdminEditScreenTables(); });
